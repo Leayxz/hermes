@@ -1,13 +1,24 @@
+from dataclasses import dataclass
+from typing import cast, Any
+from datetime import timedelta
+from decimal import Decimal
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils import timezone
-from datetime import timedelta
-from decimal import Decimal
 
 from .models import Car, Rental
 from .serializers import CarSerializer, RentalSerializer, RentalCreateSerializer
 from . import database
+
+
+@dataclass
+class RentalDataInput:
+    car_id: int
+    customer_name: str
+    customer_email: str
+    days: int
 
 
 @api_view(['GET'])
@@ -44,12 +55,11 @@ def create_rental(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # 2. Extração dos dados já validados
-    data = serializer.validated_data
-    car_id = data['car_id']
-    days = data['days']
+    dados_validados = cast(dict[str, Any], serializer.validated_data)
+    data = RentalDataInput(**dados_validados)
 
     # 3. Busca do carro informado e validação de existência + disponibilidade
-    car = database.get_car_by_id(car_id)
+    car = database.get_car_by_id(data.car_id)
 
     if car is None:
         return Response({"error": "Car not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -58,22 +68,22 @@ def create_rental(request):
         return Response({"error": "Car is not available"}, status=status.HTTP_400_BAD_REQUEST)
 
     # 4. Cálculo do custo total da locação e aplicação dos descontos
-    total_cost = car.daily_rate * days
+    total_cost = car.daily_rate * data.days
 
-    if days > 7:
+    if data.days > 7:
         total_cost -= total_cost * Decimal("0.1")
-    elif days > 3:
+    elif data.days > 3:
         total_cost -= total_cost * Decimal("0.05")
 
     # 5. Definição do período da locação
     start_date = timezone.now()
-    end_date = start_date + timedelta(days=days)
+    end_date = start_date + timedelta(days=data.days)
 
     # 6. Criação do registro de locação
     rental = database.create_rental(
-        car_id=car_id,
-        customer_name=data['customer_name'],
-        customer_email=data['customer_email'],
+        car_id=data.car_id,
+        customer_name=data.customer_name,
+        customer_email=data.customer_email,
         start_date=start_date,
         end_date=end_date,
         total_cost=total_cost
