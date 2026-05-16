@@ -35,52 +35,54 @@ def get_car(request, car_id):
 
 @api_view(['POST'])
 def create_rental(request):
-    """
-    Criar uma nova locação
-    """
+    """Criar uma nova locação para um carro disponível."""
+
+    # 1. Validação dos dados recebidos da REQ
     serializer = RentalCreateSerializer(data=request.data)
-    
+
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+    # 2. Extração dos dados já validados
     data = serializer.validated_data
     car_id = data['car_id']
     days = data['days']
-    
-    # Encontrar carro
+
+    # 3. Busca do carro informado e validação de existência + disponibilidade
     car = database.get_car_by_id(car_id)
+
     if car is None:
         return Response({"error": "Car not found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    if car.available == False:
+
+    if not car.available:
         return Response({"error": "Car is not available"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Calcular custo
-    total_cost = daily_rate * days
-    
-    # Aplicar desconto 
+
+    # 4. Cálculo do custo total da locação e aplicação dos descontos
+    total_cost = car.daily_rate * days
+
     if days > 7:
-        total_cost = total_cost - (total_cost * 0.1)
+        total_cost -= total_cost * Decimal("0.1")
     elif days > 3:
-        total_cost = total_cost - (total_cost * 0.05)
-    
-    # Criar locação
+        total_cost -= total_cost * Decimal("0.05")
+
+    # 5. Definição do período da locação
     start_date = timezone.now()
     end_date = start_date + timedelta(days=days)
-    
+
+    # 6. Criação do registro de locação
     rental = database.create_rental(
         car_id=car_id,
         customer_name=data['customer_name'],
         customer_email=data['customer_email'],
         start_date=start_date,
         end_date=end_date,
-        total_cost=Decimal(str(total_cost))
+        total_cost=total_cost
     )
-    
-    # Marcar carro como indisponível
+
+    # 7. Atualização da disponibilidade do carro
     car.available = False
     database.update_car(car)
-    
+
     rental_serializer = RentalSerializer(rental)
     return Response(rental_serializer.data, status=status.HTTP_201_CREATED)
 
