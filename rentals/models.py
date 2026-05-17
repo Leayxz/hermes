@@ -42,3 +42,25 @@ class Rental(models.Model):
     def __str__(self):
         return f"Rental {self.id} - {self.customer_name}"
 
+
+class Reward(models.Model):
+    """Tabela responsável por armazenar o estado atual dos pontos de recompensa do usuário."""
+
+    customer_email = models.EmailField(validators=[EmailValidator()])
+    total_points = models.IntegerField(default=0)
+    tier = models.TextField(default="Bronze")
+    points_to_next_tier = models.IntegerField(default=0)
+    lifetime_points_earned = models.IntegerField(default=0)
+    lifetime_points_redeemed = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RewardTransaction(models.Model):
+    """Tabela responsável por registrar todas as transações de recompensas do usuário."""
+
+    customer_email = models.EmailField(validators=[EmailValidator()])
+    type = models.TextField()
+    points = models.IntegerField()
+    reason = models.TextField()
+    rental_id = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
