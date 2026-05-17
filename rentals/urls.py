@@ -10,4 +10,7 @@ urlpatterns = [
     path('rentals/<int:rental_id>/return/', views.return_rental, name='return_rental'),
     path('rentals/customer/<str:customer_email>/', views.get_customer_rentals, name='get_customer_rentals'),
     path('stats/', views.get_stats, name='get_stats'),
+    path("rewards/customer/<str:customer_email>/", views.get_client_rewards, name="get_client_reward"),
+    path("rewards/customer/<str:customer_email>/history/", views.get_reward_transaction_history, name="get_reward_transaction_history"),
+    path("rewards/apply/", views.apply_rewards_points, name="apply_rewards_points")
 ]
