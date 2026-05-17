@@ -27,3 +27,15 @@ class RentalCreateSerializer(serializers.Serializer):
     customer_email = serializers.EmailField()
     days = serializers.IntegerField(min_value=1)
 
+
+class EmailSerializer(serializers.Serializer):
+    """Serializer para validação de inputs que requerem apenas o email do cliente."""
+    customer_email = serializers.EmailField()
+
+
+class ApplyRewardSerializer(serializers.Serializer):
+    """Serializer para validação de inputs para o endpoint de aplicação de pontos de recompensa."""
+
+    rental_id = serializers.IntegerField()
+    customer_email = serializers.EmailField()
+    points_to_redeem = serializers.IntegerField(min_value=100)
