@@ -11,6 +11,9 @@ pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
 
+# Ingestão dos dados
+./setup.cmd
+
 # Rodando o servidor
 python manage.py runserver
 
@@ -55,6 +58,9 @@ pytest
 
 - Poderia aplicar paginação nos endpoints que retornam todos os dado, ordenação e filtragem, e exportação em PDF.
 
+- Implementar autorização e permissão.
+
+- Implementar `multi-stage` em Dockerfile e padronizar todos os `COPY` individualmente para não precisar acontecer sempre.
 
 # Anotações
 ### 1. Migrações em Rentals
@@ -93,4 +99,4 @@ pytest
 
 - Tabelas `RewardAdmin` e `RewardTransactionAdmin` foram adicionados para controle em `Admin`.
 
-- Toda a documentação foi padronizada em `docs/`
+- Toda a documentação foi padronizada em `docs/`.
