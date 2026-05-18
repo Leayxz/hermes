@@ -23,6 +23,7 @@ pip install -r requirements.txt
 
 2. **Execute as migrações:**
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
@@ -45,7 +46,7 @@ A API estará disponível em `http://localhost:8000/api/`
 
 ## Documentação da API
 
-### Endpoints Disponíveis
+### Endpoints Locação
 
 - `GET /api/` - Mensagem de boas-vindas
 - `GET /api/cars/` - Listar todos os carros disponíveis
@@ -55,6 +56,11 @@ A API estará disponível em `http://localhost:8000/api/`
 - `GET /api/rentals/` - Listar todas as locações
 - `GET /api/rentals/customer/{email}/` - Obter locações por email do cliente
 - `GET /api/stats/` - Obter estatísticas de locações
+
+### Endpoints Sistema de Rewards
+- `GET /api/rewards/customer/{customer_email}/` - Obter saldo atual de recompensas do cliente
+- `GET /api/rewards/customer/{customer_email}/history/` - Obter histórico completo de transações de pontos
+- `POST /api/rewards/apply/` - Aplicar pontos de recompensa como desconto em uma locação
 
 ### Painel Admin
 
@@ -83,12 +89,13 @@ docker-compose exec web python manage.py test rentals
 car_rental/           # Configurações do projeto Django
 rentals/              # Aplicação principal
 ├── models.py         # Modelos Django ORM
-├── database.py       # Camada de acesso a dados (intencionalmente imperfeita)
+├── rewards.py        # Serviço responsável pelo sistema de recompensas.
+├── database.py       # Camada de acesso a dados.
 ├── views.py          # Views da API DRF
 ├── serializers.py    # Serializers DRF
 ├── urls.py           # Roteamento de URLs
 ├── admin.py          # Configuração do admin Django
-└── tests.py          # Casos de teste (incompletos)
+└── tests.py          # Casos de teste.
 manage.py             # Script de gerenciamento Django
 requirements.txt      # Dependências Python
 Dockerfile            # Definição da imagem Docker
@@ -103,4 +110,3 @@ docker-entrypoint.sh  # Script de inicialização do container
 ## Não vacile 😆
 
 Leia o arquivo [de instruções](INSTRUCOES_CANDIDATO.md) para entender o que é esperado do exercício.
-
