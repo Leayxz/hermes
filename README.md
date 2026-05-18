@@ -30,6 +30,9 @@ python manage.py migrate
 3. **Carregue os dados iniciais (opcional):**
 ```bash
 python manage.py shell < init_data.py
+
+# Windows
+./setup.cmd
 ```
 
 4. **Crie um superusuário (opcional, para painel admin):**
