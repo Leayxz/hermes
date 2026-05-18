@@ -1,0 +1,9 @@
+# Caches python
+**__pycache__/
+**pytest_cache/
+
+# Venv
+**venv/
+
+# Banco de dados
+**db.sqlite3
