@@ -1,4 +1,3 @@
-# Database access layer - intentionally has some issues for assessment
 from .models import Car, Rental, Reward, RewardTransaction
 from django.db.models import Sum
 
