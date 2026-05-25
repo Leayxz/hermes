@@ -6,7 +6,7 @@ from dtos import RewardsResult, RewardHistoryResult, ApplyRewardPointsResult, Re
 class RewardError(Enum): 
     INSUFFICIENT_POINTS = "Usuário não possui pontos suficientes."
     RENTAL_NOT_FOUND = "Locação não encontrada."
-    USER_NOT_AUTORIZED = "Usuário só deve aplicar descontos em suas próprias locações."
+    USER_NOT_AUTHORIZED = "Usuário só deve aplicar descontos em suas próprias locações."
 
 class RewardsService:
     """Serviço responsável pelo sistema de recompensas do usuário."""
