@@ -103,7 +103,7 @@ class RewardsService:
 
         # 5. Usuário só deve aplicar descontos na sua própria locação
         if rental.customer_email != data.customer_email:
-            return ApplyRewardPointsResult(error=RewardError.USER_NOT_AUTORIZED)
+            return ApplyRewardPointsResult(error=RewardError.USER_NOT_AUTHORIZED)
 
         # 6. Calculo do desconto baseado nos pontos do usuário
         discount, used_points = self._calculate_discount(data.points_to_redeem)
