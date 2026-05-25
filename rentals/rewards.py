@@ -1,39 +1,12 @@
+from enum import Enum
 from decimal import Decimal
-from dataclasses import dataclass
-from datetime import datetime
+from dtos import RewardsResult, RewardHistoryResult, ApplyRewardPointsResult, RewardTransactionResult
 
-
-@dataclass
-class RewardsResult:
-    customer_email: str
-    total_points: int
-    tier: str
-    points_to_next_tier: int
-    lifetime_points_earned: int
-    lifetime_points_redeemed: int
-    updated_at: datetime
-
-
-@dataclass
-class RewardTransactionResult:
-    customer_email: str
-    type: str
-    points: float
-    reason: str
-    rental_id: int
-
-
-@dataclass
-class RewardHistoryResult:
-    customer_email: str
-    transactions: list[dict]
-
-
-@dataclass
-class ApplyRewardPointsResult:
-    success: bool
-    message: str
-
+# debt: se os erros forem movidos, todos os imports precisam ser atualizados, idealmente deveria ser errors.py
+class RewardError(Enum): 
+    INSUFFICIENT_POINTS = "Usuário não possui pontos suficientes."
+    RENTAL_NOT_FOUND = "Locação não encontrada."
+    USER_NOT_AUTORIZED = "Usuário só deve aplicar descontos em suas próprias locações."
 
 class RewardsService:
     """Serviço responsável pelo sistema de recompensas do usuário."""
@@ -81,6 +54,7 @@ class RewardsService:
             }
 
             for transaction in transactions
+
         ]
 
         return RewardHistoryResult(customer_email=customer_email, transactions=transactions_list)
@@ -115,27 +89,27 @@ class RewardsService:
 
         # 2. Usuário deve possuir no mínimo 100 pontos para aplicar desconto
         if rewards.total_points < 100:
-            return ApplyRewardPointsResult(success=False, message="Usuário não possui pontos suficientes.")
+            return ApplyRewardPointsResult(error=RewardError.INSUFFICIENT_POINTS)
 
         # 3. Usuário deve possuir pontos suficientes para aplicar o desconto desejado
         if rewards.total_points < data.points_to_redeem:
-            return ApplyRewardPointsResult(success=False, message="Usuário possui menos pontos do que deseja resgatar.")
+            return ApplyRewardPointsResult(error=RewardError.INSUFFICIENT_POINTS)
 
         # 4. Dados da rental em que será aplicado o desconto
         rental = self._database.get_rental_by_id(data.rental_id)
 
         if not rental:
-            return ApplyRewardPointsResult(success=False, message="Locação não encontrada.")
+            return ApplyRewardPointsResult(error=RewardError.RENTAL_NOT_FOUND)
 
         # 5. Usuário só deve aplicar descontos na sua própria locação
         if rental.customer_email != data.customer_email:
-            return ApplyRewardPointsResult(success=False, message="Usuário só deve aplicar descontos em suas próprias locações.")
+            return ApplyRewardPointsResult(error=RewardError.USER_NOT_AUTORIZED)
 
         # 6. Calculo do desconto baseado nos pontos do usuário
         discount, used_points = self._calculate_discount(data.points_to_redeem)
 
         # 7. Aplicação do desconto e garantia de que o custo total não seja negativo
-        rental.total_cost -= Decimal(discount)
+        rental.total_cost -= Decimal(discount) # debt
         rental.total_cost = max(rental.total_cost, Decimal("0"))
 
         # 8. Atualização dos pontos do usuário, Tier e Next Tier
@@ -151,7 +125,7 @@ class RewardsService:
         self._database.update_customer_rewards(rewards)
         self._database.update_rental(rental)
 
-        return ApplyRewardPointsResult(success=True, message="Desconto aplicado com sucesso.")
+        return ApplyRewardPointsResult(message="Desconto aplicado com sucesso.")
 
 
     def _calculate_discount(self, points_to_redeem: int) -> tuple[Decimal, int]:
